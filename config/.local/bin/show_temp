@@ -1,0 +1,12 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Prints rpi temperature in C.
+
+echo "scale=1; t=$(cat /sys/class/thermal/thermal_zone0/temp); t/1000" |bc -l
+
+# vim: ft=sh:sw=4:et:ai
+

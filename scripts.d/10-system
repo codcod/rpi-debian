@@ -1,0 +1,84 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Configures system-wide settings.
+
+set -e
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+settings_tz='Europe/Warsaw'
+settings_hostname='rpi4'
+settings_locale='en_US.UTF-8'
+
+function configure_hostname_tz_locales() {
+    print 'Configuring hostname, tz, locales'
+    timedatectl set-timezone $settings_tz
+    hostnamectl set-hostname $settings_hostname
+    rm /etc/network/interfaces.d/eth0
+
+    apt-get -y install locales
+    sed -i "s/# $settings_locale/$settings_locale/g" /etc/locale.gen
+    sed -i "s/# en_GB.UTF-8/en_GB.UTF-8/g" /etc/locale.gen  # sorry!
+    locale-gen
+
+    cat <<-EOF >> /etc/default/locale
+    LANG="en_US.UTF-8"
+    LANGUAGE="en_US.UTF-8"
+    LC_MEASUREMENT="en_GB.UTF-8"
+    LC_MESSAGES="en_US.UTF-8"
+    LC_PAPER="en_GB.UTF-8"
+    LC_TIME="en_GB.UTF-8"
+EOF
+}
+
+function configure_apt() {
+    print 'Reconfiguring APT so that it does not install additional packages'
+    printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' \
+        > /etc/apt/apt.conf.d/80dont-install-additional-packages
+}
+
+function configure_boot() {
+    # https://www.raspberrypi.com/documentation/computers/config_txt.html
+    print 'Setting boot parameters'
+    cat <<-EOF > /boot/config.txt
+    # disable audio (does not load snd_bcm2835)
+    dtparam=audio=off
+
+    # dont load overlays for detected cameras
+    camera_auto_detect=0
+
+    # disable Bluetooth
+    dtoverlay=disable-bt
+EOF
+}
+
+function set_weekly_updates() {
+    print 'Configuring weekly updates'
+    cat <<-EOF > /etc/cron.weekly/autoupdate
+    #!/bin/sh
+    apt-get update
+    apt-get upgrade -y
+    apt-get autoclean
+EOF
+    chmod 755 /etc/cron.weekly/autoupdate
+}
+
+configure_hostname_tz_locales
+configure_apt
+configure_boot
+set_weekly_updates
+
+print "Script completed successfully."
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+

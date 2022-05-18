@@ -1,0 +1,38 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Sets up pgAdmin4 in Docker.
+
+set -e
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+print 'Pulling pgadmin4 docker image and starting it'
+docker pull dpage/pgadmin4
+docker run --name 'pgadmin' \
+    -p 15432:80 \
+    -e 'PGADMIN_DEFAULT_EMAIL=raspi@raspi.pl' \
+    -e 'PGADMIN_DEFAULT_PASSWORD=raspi' \
+    -d page/pgadmin4
+
+# behind traefik (add those options while running the image):
+# https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html
+# -e "SCRIPT_NAME=/pgadmin4" \
+# -l "traefik.frontend.rule=PathPrefix:/pgadmin4" \
+
+IP=$(ip addr show dev wlan0 |grep 'inet ' |awk '{print $2}')
+print "Open browser at http://${IP%/*}:15432 and log in as raspi@rpi / raspi"
+
+print "Script completed successfully."
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+

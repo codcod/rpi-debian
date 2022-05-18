@@ -1,0 +1,27 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Todo.
+
+set -e
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+for f in scripts.d/*; do
+    print "Running script: $f"
+    bash -c "$f"
+done
+
+print "System is configured now, well done!"
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+

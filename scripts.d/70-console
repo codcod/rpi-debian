@@ -1,0 +1,28 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Shows dialogs that allow to configure keyboard and console by the user.
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+print 'Preparing to configure keyboard and console'
+apt-get -y install \
+    keyboard-configuration \
+    console-setup
+
+# dpkg-reconfigure keyboard-configuration
+dpkg-reconfigure console-setup
+
+print "Script completed successfully."
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+

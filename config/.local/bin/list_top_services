@@ -1,0 +1,38 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Lists status of services essential for this box and setup.
+
+print () {
+    printf "\n\033[1m$1\033[0m\n"
+}
+
+services=(
+	docker
+	rabbitmq-server
+	postgresql
+)
+
+h='\033[1m'
+r='\033[0m'
+
+exists() {
+	systemctl cat -- $1.service &> /dev/null && echo $?
+}
+
+for s in ${services[@]}; do
+	exists $s $> /dev/null
+	if [[ $? -eq "0" ]]; then
+		active=$(systemctl is-active $s)
+		enabled=$(systemctl is-enabled $s)
+		printf "Service $h%-20s$r is $h$active$r and $h$enabled$r\n" "$s"
+	else
+		printf "Service $h$s$r doesn't seem to exist\n"
+	fi
+done
+
+# vim: ft=sh:sw=4:et:ai
+

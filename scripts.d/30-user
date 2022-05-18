@@ -1,0 +1,85 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Creates a 'regular' user and configures his/hers account with sane
+# and minimal defaults.
+
+set -e
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+settings_user=${1:-nka}
+settings_default_pass=${1:-default}
+
+function add_user() {
+    local user=$1
+    local pass=$2
+    print "Adding user $user with temp password $pass"
+    adduser --disabled-password --gecos "" $user
+    # set default password and expire it at once
+    echo $user:$pass |chpasswd
+    passwd -e $user
+
+    # chsh -s $(which zsh)
+}
+
+function add_groups_to_user() {
+    local user=$1
+    local groups_to_add=$2
+    print "Adding $user to groups $groups_to_add"
+    for grp in $groups_to_add; do
+        # create group if it doesn't exist yet
+        cat /etc/group |grep $grp &> /dev/null || addgroup $grp
+        # add user to this group
+        usermod -aG $grp $user
+    done
+}
+
+function configure_doas_for_user() {
+    local user=$1
+    print "Configuring doas (for $user)"
+    cat <<-EOF > /etc/doas.conf
+    permit persist keepenv :wheel
+    permit nopass $user as root cmd apt
+    permit nopass $user as root cmd poweroff
+EOF
+}
+
+function configure_account_for_user() {
+    local user=$1
+    local user_home="/home/$user"
+    print "Configuring $user_home account"
+    #mkdir -p $user_home/.local
+    #cp -a ./bin/. $user_home/.local
+    #cp -a ./config/. $user_home
+    rsync -avu ./config/ $user_home
+    chown -R $user:$user $user_home
+}
+
+function configure_root_account() {
+    print "Configuring root account while we are at it"
+    #cp -a ./config/. /root
+    rsync -avu ./config/ /root
+    sed -i 's/01;32m/01;31m/g' /root/.bashrc
+}
+
+add_user $settings_user $settings_default_pass
+add_groups_to_user $settings_user 'wheel docker'
+configure_account_for_user $settings_user
+configure_doas_for_user $settings_user
+
+configure_root_account
+
+print "Script completed successfully."
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+

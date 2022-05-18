@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# /root/network.sh:
+# make-shift wifi setup 
+
+#iface=$(iw dev |grep Inteface |awk '{print $2}')
+iface=$1
+
+if [[ "$#" -ne 1 ]]; then
+    printf "Warning: missing iface name, trying with 'wlan1'...\n"
+    iface=wlan1
+fi
+
+ifdown -a
+
+ip link set $iface up
+wpa_supplicant -B -D wext -i $iface -c /etc/wpa_supplicant.conf
+dhclient $iface
+
+# vim: ft=sh:sw=4:et:ai
+

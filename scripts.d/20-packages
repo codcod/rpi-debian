@@ -1,0 +1,59 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Finds the quckest mirror, enables non-free packages and installs
+# essential packages.
+
+set -e
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+print 'Searching for the quickest mirror'
+apt-get -y install netselect-apt
+netselect-apt 2> /dev/null
+sed -i '/security/d' sources.list
+sed -i 's/contrib/contrib non-free/g' sources.list
+mv sources.list /etc/apt/
+apt-get update
+
+print 'Upgrading installed packages'
+apt-get -y upgrade
+
+print 'Installing essential packages'
+packages=(
+    #debian-archive-keyring
+    #debian-keyring
+    bc
+    build-essential
+    deborphan
+    doas
+    gnupg2
+    hdparm
+    htop
+    iotop
+    locales
+    lsb-release
+    lsof
+    mc
+    neovim
+    ntp
+    rsync
+    tmux
+    zsh
+    )
+apt-get -y --fix-missing install "${packages[@]}"
+apt-get -y autoremove
+
+print "Script completed successfully."
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+

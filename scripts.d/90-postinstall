@@ -1,0 +1,62 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Final touches.
+
+set -e
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+function start_watchdog() {
+    local cfg='/etc/systemd/system.conf'
+    printf "\n# enable watchdog\ndtparam=watchdog=on\n" >> /boot/config.txt
+    sed '/#RuntimeWatchdogSec/a RuntimeWatchdogSec=10s' $cfg
+    sed '/#ShutdownWatchdogSec/a ShutdownWatchdogSec=10min' $cfg
+    systemctl daemon-reload
+}
+
+function remove_unnecessary_packages() {
+    print 'Removing unnecessary packages'
+    apt-get remove -y \
+        apt-transport-https \
+        ca-certificates \
+
+    apt-get autoremove  # intentionally without -y
+    apt-get clean
+}
+
+function remove_foreign_man_files() {
+    print 'Removing foreign man files'
+    rm -rf /usr/share/man/??
+    rm -rf /usr/share/man/??_*
+}
+
+function remove_unnecessary_locales() {
+    print 'Removing unnecessary locales'
+    apt-get install -y localepurge
+}
+
+function show_considerations() {
+    print 'You might want to consider removing those packages as well:'
+    deborphan --guess-all
+}
+
+# start_watchdog
+# remove_unnecessary_packages
+remove_foreign_man_files
+remove_unnecessary_locales
+show_considerations
+
+print "Script completed successfully."
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+

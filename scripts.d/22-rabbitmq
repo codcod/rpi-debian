@@ -1,0 +1,114 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Installs custom distribution (newer than in the official repositories)
+# of Erlang and RabbitMQ server.
+#
+# REFERENCES:
+# - https://wiki.debian.org/DebianRepository/UseThirdParty
+# - https://www.rabbitmq.com/install-debian.html
+
+set -e
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+settings_user=${1:-rabbitmq}
+settings_pass=${1:-rabbitmq}
+
+distro=debian
+codename=$(lsb_release -cs)
+
+function add_erlang_repo() {
+    print 'Adding custom Erlang repository'
+    #
+    # server_repo='https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server'
+    # server_list='/etc/apt/sources.list.d/rabbitmq-rabbitmq-server.list'
+    # curl -1sLf "$server_repo/gpg.9F4587F226208342.key" | apt-key add -
+    # curl -1sLf "$server_repo/config.deb.txt?distro=$distro&codename=$distro" \
+    #     > $server_list
+    #
+    local fingerprint='0xf77f1eda57ebb1cc'
+    local key_file='/usr/share/keyrings/launchpad-erlang-archive-keyring.gpg'
+    curl -1sLf "https://keyserver.ubuntu.com/pks/lookup?op=get&search=$fingerprint" \
+        |gpg --dearmor |tee $key_file > /dev/null
+
+    local sources_file='/etc/apt/sources.list.d/launchpad-erlang.list'
+    cat <<-EOF > $sources_file
+    # Source: rabbitmq
+    # Site: https://github.com/rabbitmq/erlang-debian-package
+    # Repository: rabbitmq / Modern Erlang packages for Debian
+    # Description: A fork of the official Erlang packages for Debian, produced to package most recent releases as they come out.
+
+    deb [signed-by=$key_file] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu focal main
+    deb-src [signed-by=$key_file] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu focal main
+EOF
+}
+
+function add_rabbitmq_repo() {
+    print 'Adding custom RabbitMQ repository'
+    local key_file='/usr/share/keyrings/packagecloud-rabbitmq-archive-keyring.gpg'
+    curl -1sLf "https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey" \
+        |gpg --dearmor |tee $key_file > /dev/null
+
+    local sources_file='/etc/apt/sources.list.d/packagecloud-rabbitmq.list'
+    cat <<-EOF > $sources_file
+    # Source: rabbitmq
+    # Site: http://github.com/rabbitmq/rabbitmq-server
+    # Repository: rabbitmq / rabbitmq-server
+    # Description: Open source RabbitMQ releases
+
+    deb [signed-by=$key_file] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ focal main
+    deb-src [signed-by=$key_file] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ focal main
+
+    #deb https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/debian $codename main
+    #deb-src https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/debian $codename main
+EOF
+}
+
+function install_packages() {
+    print 'Installing the newest Erlang and RabbitMQ distributions'
+    apt-get update
+    apt-get install rabbitmq-server -y --fix-missing
+}
+
+function configure_rabbitmq() {
+    print "Configuring RabbitMQ, adding user: $settings_user"
+    rabbitmqctl add_user $settings_user $settings_pass
+    rabbitmqctl set_permissions -p / $settings_user '.*' '.*' '.*'
+
+    print "Configuring RabbitMQ, adding user: admin"
+    rabbitmqctl add_user admin admin
+    rabbitmqctl set_user_tags admin administrator
+    rabbitmqctl set_permissions -p / admin '.*' '.*' '.*'
+
+    print 'Configuring RabbitMQ, enabling plugins'
+    rabbitmq-plugins --offline enable \
+        rabbitmq_management \
+        rabbitmq_stream
+}
+
+function start_rabbitmq() {
+    print 'Starting RabbitMQ service'
+    systemctl restart rabbitmq-server
+    systemctl enable rabbitmq-server
+}
+
+add_erlang_repo
+add_rabbitmq_repo
+install_packages
+configure_rabbitmq
+start_rabbitmq
+
+print "Script completed successfully."
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+

@@ -1,0 +1,85 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Installs and configures PostgreSQL, including enabling remote access
+# and creating the first database for testing purposes.
+
+set -e
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+settings_db=${1:-raspi_db}
+settings_user=${2:-raspi}
+settings_pass=${3-raspi}
+
+function add_repository() {
+    # https://wiki.debian.org/DebianRepository/UseThirdParty
+    print 'Adding PostgreSQL package repository'
+    sh -c "echo \"deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main\" \
+        > /etc/apt/sources.list.d/pgdg.list"
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+}
+
+function install_packages() {
+    print 'Installing PostgreSQL 14'
+    apt-get -y update
+    apt-get -y install postgresql-14
+}
+
+function enable_remote_access_to_server() {
+    local pg_dir='/etc/postgresql/14/main'
+    print 'Enabling remote access in the configuration files'
+
+    # pg_hba.conf
+    local conf_hba="$pg_dir/pg_hba.conf"
+    sed -i '/^local/s/peer/trust/' $conf_hba
+    sed -i '/^host/s/ident/md5/' $conf_hba
+    cat <<-EOF >> $conf_hba
+    #
+    # Added by the configuration script
+    #
+    host    all             all             0.0.0.0/24              md5
+    host    all             all             0.0.0.0/0               md5
+EOF
+
+    # postgresql.conf
+    local conf_pg="$pg_dir/postgresql.conf"
+    sed -i '/listen_addresses/a listen_addresses=\x27*\x27' $conf_pg
+
+    print 'Starting PostgreSQL service'
+    systemctl enable postgresql
+    systemctl status postgresql
+
+    print "Creating user: $settings_user and database: $settings_db"
+    su - postgres <<EOF
+psql -q -c "create database $settings_db;" >/dev/null
+psql -q -c "create user $settings_user with encrypted password '$settings_pass';" >/dev/null
+psql -q -c "grant all privileges on database $settings_db to $settings_user;" >/dev/null
+EOF
+}
+
+function configure_postgres_account() {
+    local postgres_dir='/var/lib/postgresql'
+    print "Configuring postgres account ($postgres_dir)"
+    cp config/.psqlrc $postgres_dir
+    chown postgres:postgres $postgres_dir/.psqlrc
+}
+
+add_repository
+install_packages
+enable_remote_access_to_server
+configure_postgres_account
+
+print "Script completed successfully."
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+

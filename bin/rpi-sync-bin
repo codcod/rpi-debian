@@ -1,0 +1,24 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Todo.
+
+src=${1:-'./bin/'}
+dst=${2:-"$HOME/.local/bin"}
+
+[[ ! -d "$src" ]] && { printf "Source does not exist: $src, nothing to do...\n"; exit 1; }
+[[ ! -d "$dst" ]] && mkdir -p "$dst"
+
+# -v: be verbose
+# -a: archive (smart recursive copy)
+# -i: show differences between src and dest files
+# -u: don't overwrite dst files
+rsync -avu $src $dst
+
+print "Directories '$src' and '$dst' are in sync now"
+
+# vim: ft=sh:sw=4:et:ai
+
