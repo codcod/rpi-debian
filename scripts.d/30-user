@@ -60,7 +60,7 @@ function configure_account_for_user() {
     #mkdir -p $user_home/.local
     #cp -a ./bin/. $user_home/.local
     #cp -a ./config/. $user_home
-    rsync -avu ./config/ $user_home
+    rsync -av ./config/ $user_home
     chown -R $user:$user $user_home
 }
 

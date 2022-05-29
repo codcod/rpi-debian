@@ -31,12 +31,14 @@ function configure_hostname_tz_locales() {
     locale-gen
 
     cat <<-EOF >> /etc/default/locale
-    LANG="en_US.UTF-8"
-    LANGUAGE="en_US.UTF-8"
-    LC_MEASUREMENT="en_GB.UTF-8"
-    LC_MESSAGES="en_US.UTF-8"
-    LC_PAPER="en_GB.UTF-8"
-    LC_TIME="en_GB.UTF-8"
+	LANG="en_US.UTF-8"
+	LANGUAGE="en_US.UTF-8"
+	LC_ALL="en_US.UTF-8"
+	LC_MEASUREMENT="en_GB.UTF-8"
+	LC_MESSAGES="en_US.UTF-8"
+	LC_PAPER="en_GB.UTF-8"
+	LC_TIME="en_GB.UTF-8"
+	LC_CTYPE="en_GB.UTF-8"
 EOF
 }
 
@@ -50,24 +52,24 @@ function configure_boot() {
     # https://www.raspberrypi.com/documentation/computers/config_txt.html
     print 'Setting boot parameters'
     cat <<-EOF > /boot/config.txt
-    # disable audio (does not load snd_bcm2835)
-    dtparam=audio=off
+	# disable audio (does not load snd_bcm2835)
+	dtparam=audio=off
 
-    # dont load overlays for detected cameras
-    camera_auto_detect=0
+	# dont load overlays for detected cameras
+	camera_auto_detect=0
 
-    # disable Bluetooth
-    dtoverlay=disable-bt
+	# disable Bluetooth
+	dtoverlay=disable-bt
 EOF
 }
 
 function set_weekly_updates() {
     print 'Configuring weekly updates'
     cat <<-EOF > /etc/cron.weekly/autoupdate
-    #!/bin/sh
-    apt-get update
-    apt-get upgrade -y
-    apt-get autoclean
+	#!/bin/sh
+	apt-get update
+	apt-get upgrade -y
+	apt-get autoclean
 EOF
     chmod 755 /etc/cron.weekly/autoupdate
 }

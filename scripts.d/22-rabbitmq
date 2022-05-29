@@ -42,13 +42,13 @@ function add_erlang_repo() {
 
     local sources_file='/etc/apt/sources.list.d/launchpad-erlang.list'
     cat <<-EOF > $sources_file
-    # Source: rabbitmq
-    # Site: https://github.com/rabbitmq/erlang-debian-package
-    # Repository: rabbitmq / Modern Erlang packages for Debian
-    # Description: A fork of the official Erlang packages for Debian, produced to package most recent releases as they come out.
+	# Source: rabbitmq
+	# Site: https://github.com/rabbitmq/erlang-debian-package
+	# Repository: rabbitmq / Modern Erlang packages for Debian
+	# Description: A fork of the official Erlang packages for Debian, produced to package most recent releases as they come out.
 
-    deb [signed-by=$key_file] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu focal main
-    deb-src [signed-by=$key_file] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu focal main
+	deb [signed-by=$key_file] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu focal main
+	deb-src [signed-by=$key_file] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu focal main
 EOF
 }
 
@@ -60,16 +60,16 @@ function add_rabbitmq_repo() {
 
     local sources_file='/etc/apt/sources.list.d/packagecloud-rabbitmq.list'
     cat <<-EOF > $sources_file
-    # Source: rabbitmq
-    # Site: http://github.com/rabbitmq/rabbitmq-server
-    # Repository: rabbitmq / rabbitmq-server
-    # Description: Open source RabbitMQ releases
+	# Source: rabbitmq
+	# Site: http://github.com/rabbitmq/rabbitmq-server
+	# Repository: rabbitmq / rabbitmq-server
+	# Description: Open source RabbitMQ releases
 
-    deb [signed-by=$key_file] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ focal main
-    deb-src [signed-by=$key_file] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ focal main
+	deb [signed-by=$key_file] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ focal main
+	deb-src [signed-by=$key_file] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ focal main
 
-    #deb https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/debian $codename main
-    #deb-src https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/debian $codename main
+	#deb https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/debian $codename main
+	#deb-src https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/debian $codename main
 EOF
 }
 

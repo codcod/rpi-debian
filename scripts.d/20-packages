@@ -43,6 +43,7 @@ packages=(
     lsb-release
     lsof
     mc
+    most
     neovim
     ntp
     rsync
