@@ -6,19 +6,20 @@
 # DESCRIPTION:
 # Todo.
 
-src=${1:-'./bin/'}
-dst=${2:-"$HOME/.local/bin"}
+src=${1:-'./config/'}
+dst=${2:-"$HOME/"}
 
 [[ ! -d "$src" ]] && { printf "Source does not exist: $src, nothing to do...\n"; exit 1; }
 [[ ! -d "$dst" ]] && mkdir -p "$dst"
 
-# -v: be verbose
 # -a: archive (smart recursive copy)
 # -i: show differences between src and dest files
 # -u: don't overwrite dst files
-rsync -avu $src $dst
+# -v: be verbose
+rsync -aiu $src $dst
 
-print "Directories '$src' and '$dst' are in sync now"
+printf "Directories '$src' and '$dst' are in sync now\n"
+printf "\033[1mBUT destination files were NOT overwritten if they existed\033[0m\n"
 
 # vim: ft=sh:sw=4:et:ai
 

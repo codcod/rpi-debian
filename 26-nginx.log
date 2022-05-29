@@ -1,0 +1,94 @@
+
+[1m[26-nginx] Adding custom Nginx repository[0m
+
+[1m[26-nginx] Installing the newest Nginx distribution[0m
+Get:1 http://nginx.org/packages/debian bullseye InRelease [2,860 B]
+Hit:2 http://ftp.icm.edu.pl/pub/Linux/debian stable InRelease
+Hit:3 http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu focal InRelease
+Hit:4 https://download.docker.com/linux/debian bullseye InRelease
+Hit:5 https://packages.grafana.com/oss/deb stable InRelease
+Hit:6 https://repos.influxdata.com/debian stable InRelease
+Hit:7 http://apt.postgresql.org/pub/repos/apt bullseye-pgdg InRelease
+Get:8 http://nginx.org/packages/debian bullseye/nginx arm64 Packages [9,934 B]
+Hit:9 https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu focal InRelease
+Fetched 12.8 kB in 2s (6,214 B/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following NEW packages will be installed:
+  nginx
+0 upgraded, 1 newly installed, 0 to remove and 17 not upgraded.
+Need to get 849 kB of archives.
+After this operation, 3,108 kB of additional disk space will be used.
+Get:1 http://nginx.org/packages/debian bullseye/nginx arm64 nginx arm64 1.22.0-1~bullseye [849 kB]
+Fetched 849 kB in 0s (1,798 kB/s)
+Selecting previously unselected package nginx.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 50093 files and directories currently installed.)
+Preparing to unpack .../nginx_1.22.0-1~bullseye_arm64.deb ...
+----------------------------------------------------------------------
+
+Thanks for using nginx!
+
+Please find the official documentation for nginx here:
+* https://nginx.org/en/docs/
+
+Please subscribe to nginx-announce mailing list to get
+the most important news about nginx:
+* https://nginx.org/en/support.html
+
+Commercial subscriptions for nginx are available on:
+* https://nginx.com/products/
+
+----------------------------------------------------------------------
+Unpacking nginx (1.22.0-1~bullseye) ...
+Setting up nginx (1.22.0-1~bullseye) ...
+Installing new version of config file /etc/default/nginx ...
+Installing new version of config file /etc/init.d/nginx ...
+Installing new version of config file /etc/logrotate.d/nginx ...
+
+Configuration file '/etc/nginx/fastcgi_params'
+ ==> Deleted (by you or by a script) since installation.
+ ==> Package distributor has shipped an updated version.
+   What would you like to do about it ?  Your options are:
+    Y or I  : install the package maintainer's version
+    N or O  : keep your currently-installed version
+      D     : show the differences between the versions
+      Z     : start a shell to examine the situation
+ The default action is to keep your current version.
+*** fastcgi_params (Y/I/N/O/D/Z) [default=N] ? Y
+Installing new version of config file /etc/nginx/fastcgi_params ...
+
+Configuration file '/etc/nginx/mime.types'
+ ==> Deleted (by you or by a script) since installation.
+ ==> Package distributor has shipped an updated version.
+   What would you like to do about it ?  Your options are:
+    Y or I  : install the package maintainer's version
+    N or O  : keep your currently-installed version
+      D     : show the differences between the versions
+      Z     : start a shell to examine the situation
+ The default action is to keep your current version.
+*** mime.types (Y/I/N/O/D/Z) [default=N] ? Y
+Installing new version of config file /etc/nginx/mime.types ...
+
+Configuration file '/etc/nginx/nginx.conf'
+ ==> Deleted (by you or by a script) since installation.
+ ==> Package distributor has shipped an updated version.
+   What would you like to do about it ?  Your options are:
+    Y or I  : install the package maintainer's version
+    N or O  : keep your currently-installed version
+      D     : show the differences between the versions
+      Z     : start a shell to examine the situation
+ The default action is to keep your current version.
+*** nginx.conf (Y/I/N/O/D/Z) [default=N] ? Y
+Installing new version of config file /etc/nginx/nginx.conf ...
+Processing triggers for man-db (2.9.4-2) ...
+
+[1m[26-nginx] Configuring Nginx[0m
+
+[1m[26-nginx] Starting Nginx service[0m
+Synchronizing state of nginx.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable nginx
+Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /lib/systemd/system/nginx.service.
+
+[1m[26-nginx] Script completed successfully.[0m

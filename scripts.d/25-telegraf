@@ -18,12 +18,6 @@ print () {
     printf "\n\033[1m[$script] $1\033[0m\n"
 }
 
-settings_user=${1:-rabbitmq}
-settings_pass=${1:-rabbitmq}
-
-distro=debian
-codename=$(lsb_release -cs)
-
 function add_telegraf_repo() {
     print 'Adding custom Telegraf repository'
     local key_file='/usr/share/keyrings/influxdb-telegraf-archive-keyring.gpg'
