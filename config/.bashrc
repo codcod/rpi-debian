@@ -17,8 +17,8 @@ HISTIGNORE='ls:ll:la:man:cd:history'
 shopt -s histappend
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
+HISTSIZE=10000
+HISTFILESIZE=20000
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -76,7 +76,7 @@ esac
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
+    alias ls='ls --color=auto --group-directories'
     alias dir='dir --color=auto'
     alias vdir='vdir --color=auto'
 
@@ -113,8 +113,52 @@ if ! shopt -oq posix; then
   fi
 fi
 
+#
+# raspi
+#
+
+# XDG Base
+
+# User-specific configurations (analogous to /etc)
+[[ -z "${XDG_CONFIG_HOME}" ]] && export XDG_CONFIG_HOME=$HOME/.config
+
+export DOCKER_CONFIG="${XDG_CONFIG_HOME}/docker"
+export INPUTRC="${XDG_CONFIG_HOME}/readline/inputrc"
+export MOST_INITFILE="${XDG_CONFIG_HOME}/most/mostrc"
+export NPM_CONFIG_USERCONFIG="${XDG_CONFIG_HOME}/npm/npmrc"
+export PSQLRC="${XDG_CONFIG_HOME}/pg/psqlrc"
+export INFLUXD_CONFIG_PATH="${XDG_CONFIG_HOME}/influxdb/"
+
+# User-specific data files (analogous to /usr/share)
+[[ -z "${XDG_DATA_HOME}" ]] && export XDG_DATA_HOME=$HOME/.local/share
+
+export GOPATH="${XDG_DATA_HOME}/go"
+export TERMINFO="${XDG_DATA_HOME}/terminfo"
+
+# User-specific non-essential (cached) data (analogous to /var/cache)
+[[ -z "${XDG_CACHE_HOME}" ]] && export XDG_CACHE_HOME=$HOME/.cache
+
+export HISTFILE="${XDG_CACHE_HOME}/bash_history"
+export LESSHISTFILE="${XDG_CACHE_HOME}/less_history"
+export PSQL_HISTORY="${XDG_CACHE_HOME}/psql_history"
+export SQLITE_HISTORY="${XDG_CACHE_HOME}/sqlite_history"
+
+# Rest
+
+alias sqlite3='sqlite3 -init "${XDG_CONFIG_HOME}/sqlite/sqliterc"'
+alias wget='wget --hsts-file="${XDG_CACHE_HOME}/wget-hsts"'
+
 complete -cf doas
 complete -c man which
 
-export PATH=${PATH}:${HOME}/.local/bin
+export PAGER='most'
+export EDITOR='nvim'
+export MOST_SWITCHES='-s'
+export LESS='-R'
+export PATH=${PATH}:/sbin/:${HOME}/.local/bin
 
+if [[ ! "$PATH" == */usr/lib/rabbitmq/bin* ]]; then
+    export PATH="${PATH:+${PATH}:}/usr/lib/rabbitmq/bin"
+fi
+
+# vim: sw=4:et:ai

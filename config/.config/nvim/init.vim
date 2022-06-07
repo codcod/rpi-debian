@@ -1,6 +1,7 @@
 " minimal neovim config
 
 set tabstop=4
+set modeline
 
 " remember position of last edit and return on reopen
 if has("autocmd")

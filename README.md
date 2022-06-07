@@ -95,6 +95,8 @@ Useful apt commands.
 - `apt policy erlang-base` - list available versions of a package
 - `apt show rabbitmq-server` - detailed info about a package with dependencies
 - `ssh-keygen -R host` - remove entries for a host from known_hosts
+- `journalctl -u telegraf.service` - see log entries for the user (has to be in
+  `adm` group)
 
 Start and stop pgAdmin (it uses a lot of resources and starts up really slowly).
 
@@ -109,4 +111,34 @@ Git configuration:
 $ git config --global user.name "<user>"
 $ git config --global user.email "<email>"
 ```
+
+## Create a file in Bash script with no indentations
+
+To create a file from within a Bash script the following technique is quite
+common:
+
+```shell
+function create_a_file() {
+    cat <<EOF > outfile.txt
+    Hello
+	World!
+EOF
+}
+```
+
+But doing just so will make the resulting file content indented.
+
+To disable indentation in the output file use `cat <<-EOF`, note the minus
+sign. And indent with tabs instead of spaces.
+
+If the file has `et` option set, or `expandtab`, just switch it off and
+replace spaces with tabs:
+
+```text
+:set noet
+:retab!
+```
+
+You can use `VISUAL MODE` to choose specific lines that should have spaces
+replaced.
 

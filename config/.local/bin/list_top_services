@@ -12,8 +12,13 @@ print () {
 
 services=(
 	docker
-	rabbitmq-server
 	postgresql
+	rabbitmq-server
+    grafana-server
+    influxdb
+    lighttpd
+    nginx
+    telegraf
 )
 
 h='\033[1m'

@@ -1,0 +1,96 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Installs Telegraf.
+#
+# REFERENCES:
+# - https://docs.influxdata.com/telegraf/v1.22/install/
+
+set -e
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+function add_telegraf_repo() {
+    print 'Adding custom Telegraf repository'
+    local key_file='/usr/share/keyrings/influxdb-telegraf-archive-keyring.gpg'
+    curl -1sLf "https://repos.influxdata.com/influxdb.key" \
+        |gpg --dearmor |tee $key_file > /dev/null
+
+    local sources_file='/etc/apt/sources.list.d/influxdb-telegraf.list'
+    cat <<-EOF > $sources_file
+	# Source: InfluxData.com
+	# Site: https://docs.influxdata.com/telegraf/v1.22/install/
+	# Repository: Telegraf
+	# Description: Telegraf, a server-based agent, collects and sends metrics and events from databases, systems, and IoT sensors.
+
+	deb [signed-by=$key_file] https://repos.influxdata.com/debian stable main
+EOF
+}
+
+function add_grafana_repo() {
+    print 'Adding custom Grafana repository'
+    local key_file='/usr/share/keyrings/grafana-archive-keyring.gpg'
+    curl -1sLf "https://packages.grafana.com/gpg.key" \
+        |gpg --dearmor |tee $key_file > /dev/null
+
+    local sources_file='/etc/apt/sources.list.d/grafana.list'
+    cat <<-EOF > $sources_file
+	# Source: Grafana.com
+	# Site: https://grafana.com/docs/grafana/latest/installation/debian/#install-from-apt-repository
+	# Repository: Grafana
+	# Description: Query, visualize, alert on and understand your metrics no matter where they are stored.
+
+	deb [signed-by=$key_file] https://packages.grafana.com/oss/deb stable main
+EOF
+}
+
+function install_packages() {
+    print 'Installing Telegraf'
+    apt-get update
+    apt-get install telegraf influxdb2 influxdb2-cli grafana -y --fix-missing
+}
+
+function configure_telegraf() {
+    print 'Configuring Telegraf'
+    usermod -aG video telegraf
+}
+
+function start_influxdb() {
+    print 'Starting InfluxDB service'
+    systemctl restart influxdb
+    systemctl enable influxdb
+}
+
+function start_telegraf() {
+    print 'Starting Telegraf service'
+    systemctl restart telegraf
+    systemctl enable telegraf
+}
+
+function start_grafana() {
+    print 'Starting Grafana service'
+    systemctl restart grafana-server
+    systemctl enable grafana-server
+}
+
+add_telegraf_repo
+add_grafana_repo
+install_packages
+configure_telegraf
+start_influxdb
+start_telegraf
+start_grafana
+
+print "Script completed successfully."
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+

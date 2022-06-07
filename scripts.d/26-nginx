@@ -1,0 +1,68 @@
+#! /usr/bin/env bash
+#
+# raspi-debian - a set of scripts to configure Debian on Raspberry Pi 4
+# and prepare it for application development with PostgreSQL and RabbitMQ
+#
+# DESCRIPTION:
+# Installs custom distribution (newer than in the official repositories)
+# of Nginx server.
+#
+# REFERENCES:
+# - https://wiki.debian.org/DebianRepository/UseThirdParty
+# - https://cs.nginx.com/repo_setup
+
+set -e
+
+script=${0##*/}
+exec &> >(tee "$script.log")
+
+print () {
+    printf "\n\033[1m[$script] $1\033[0m\n"
+}
+
+distro=debian
+codename=$(lsb_release -cs)
+
+function add_nginx_repo() {
+    print 'Adding custom Nginx repository'
+    local key_file='/usr/share/keyrings/nginx-archive-keyring.gpg'
+    curl -1sLf https://nginx.org/keys/nginx_signing.key \
+        |gpg --dearmor |tee $key_file > /dev/null
+
+    local sources_file='/etc/apt/sources.list.d/nginx.list'
+    cat <<-EOF > $sources_file
+	# Source: nginx
+	# Site: https://nginx.org/en/
+	# Repository: nginx packages for Debian
+	# Description: HTTP and reverse proxy server, a mail proxy server, and a generic TCP/UDP proxy server.
+
+	deb [signed-by=$key_file] http://nginx.org/packages/${distro} ${codename} nginx
+EOF
+}
+
+function install_packages() {
+    print 'Installing the newest Nginx distribution'
+    apt-get update
+    apt-get install -y nginx
+}
+
+function configure_nginx() {
+    print "Configuring Nginx"
+}
+
+function start_nginx() {
+    print 'Starting Nginx service'
+    systemctl restart nginx
+    systemctl enable nginx
+}
+
+add_nginx_repo
+install_packages
+configure_nginx
+start_nginx
+
+print "Script completed successfully."
+exit 0;
+
+# vim: ft=sh:sw=4:et:ai
+
