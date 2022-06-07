@@ -69,8 +69,8 @@ EOF
 function configure_postgres_account() {
     local postgres_dir='/var/lib/postgresql'
     print "Configuring postgres account ($postgres_dir)"
-    cp config/.psqlrc $postgres_dir
-    chown postgres:postgres $postgres_dir/.psqlrc
+    cp -a config/ $postgres_dir
+    chown -R postgres:postgres $postgres_dir/
 }
 
 add_repository

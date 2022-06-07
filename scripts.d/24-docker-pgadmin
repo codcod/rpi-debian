@@ -21,7 +21,7 @@ docker run --name 'pgadmin' \
     -p 15432:80 \
     -e 'PGADMIN_DEFAULT_EMAIL=raspi@raspi.pl' \
     -e 'PGADMIN_DEFAULT_PASSWORD=raspi' \
-    -d page/pgadmin4
+    -d dpage/pgadmin4
 
 # behind traefik (add those options while running the image):
 # https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html
